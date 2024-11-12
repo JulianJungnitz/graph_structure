@@ -87,6 +87,9 @@ def get_disease_counts(driver, top_k=None, name=None, min_occurrence=1):
             return name, disease_count order by disease_count desc """ + (f" limit {top_k}" if top_k else "") + ""
     result = request(driver, query)
     
+    total_disease_count = len(result)
+    log_to_file(f"Total number of diseases: {total_disease_count} \n")
+    
     log_to_file("Diseases by count\n")
     disease_counts = {}
     for disease in result:
