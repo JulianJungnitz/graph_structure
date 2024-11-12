@@ -130,6 +130,7 @@ def get_graph_structure_overview():
 
     get_disease_counts(driver, )
 
+
     node_count_labels = [
         "Biological_sample",
         "Gene",
@@ -160,14 +161,6 @@ def get_graph_structure_overview():
 
     get_people_analysis(driver)
 
-
-    # wie viele phenoype gene und proteine hängen mit den erkrankten zusammen
-    relationships = [
-        ("Biological_sample", "HAS_DAMAGE", "Gene"),
-        ("Biological_sample", "HAS_PROTEIN", "Protein"),
-        ("Biological_sample", "HAS_DISEASE", "Disease"),
-        ("Biological_sample", "HAS_PHENOTYPE", "Phenotype"),
-    ]
 
 
 
