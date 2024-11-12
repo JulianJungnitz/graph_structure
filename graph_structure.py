@@ -76,7 +76,7 @@ def get_all_rel_min_max_avg(relationships, driver):
         get_rel_min_max_avg(rel[0], rel[1], rel[2], driver)
 
 
-def get_disease_counts(driver, top_k=None, name=None):
+def get_disease_counts(driver, top_k=None, name=None, min_occurrence=1):
     log_to_file("\n")
     log_to_file("------------------------- Disease analysis -------------------------\n")
     
@@ -90,6 +90,8 @@ def get_disease_counts(driver, top_k=None, name=None):
     log_to_file("Diseases by count\n")
     disease_counts = {}
     for disease in result:
+        if disease['disease_count'] < min_occurrence:
+            break
         log_to_file(f"{disease['name']}, {disease['disease_count']} \n")
         disease_counts[disease['name']] = disease['disease_count']
     return disease_counts
@@ -128,7 +130,7 @@ def get_graph_structure_overview():
     clear_log_file()
     log_to_file("Graph structure overview\n")
 
-    get_disease_counts(driver, )
+    get_disease_counts(driver, min_occurrence=3)
 
 
     node_count_labels = [
