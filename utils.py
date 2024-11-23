@@ -1,9 +1,9 @@
 import os
 
-NEO4J_URL = "bolt://83.229.84.12"
-NEO4J_LOGIN = "tumaiReadonly"
-NEO4J_PASSWORD = "MAKEATHON2024"
-NEO4J_DATABASE = "graph2.db"
+NEO4J_URL = "bolt://localhost:7687"
+NEO4J_LOGIN = "neo4j"
+NEO4J_PASSWORD = "password"
+NEO4J_DATABASE = "neo4j"
 
 LOG_FILE = "./log.txt"
 
