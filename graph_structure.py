@@ -185,7 +185,6 @@ def get_graph_structure_overview():
 
     # node_count_labels = get_all_node_types(driver)
 
-
     # get_all_node_counts(node_count_labels, driver)
 
     # relationships = [
@@ -198,7 +197,6 @@ def get_graph_structure_overview():
     # relationships = get_all_relationships(driver)
 
     # get_all_rel_min_max_avg(relationships, driver)
-
 
     get_people_analysis(driver)
     get_missing_ensamble_id_analysis(driver)
