@@ -142,7 +142,7 @@ def count_percentage_diff_in_sections(percentage_diff):
     return section_map
 
 
-def get_all_control_disease_comparisons(control_name, driver, min_occurrence=5):
+def get_all_control_disease_comparisons(control_name, driver, occurrences=5):
     connections = [
         ("HAS_PHENOTYPE", "Phenotype"),
         ("HAS_DAMAGE", "Gene"),
@@ -154,8 +154,8 @@ def get_all_control_disease_comparisons(control_name, driver, min_occurrence=5):
 
     query = f"""Match (d:Disease)<-[:HAS_DISEASE]-(s:Biological_sample)
                 with d, count(s) as count
-                where count >= {min_occurrence}
-                return d.name as name, count"""
+                where count <= {occurrences}
+                return d.name as name, count order by count desc"""
     diseases = request(driver, query)
     for disease in diseases:
         get_control_disease_comparison(
@@ -166,6 +166,7 @@ def get_all_control_disease_comparisons(control_name, driver, min_occurrence=5):
             disease_occurences =disease["count"],
             control_common_groups=control_common_groups,
         )
+        break
 
 
 def get_number_of_occurences( control_name, driver):
@@ -241,7 +242,9 @@ def get_disease_analysis():
     log_to_file("Disease analysis\n")
     # control_name = "esophagitis"
     control_name = "control"
-    get_all_control_disease_comparisons(control_name, driver, min_occurrence=5)
+    get_all_control_disease_comparisons(control_name, driver, occurrences=100)
+    get_all_control_disease_comparisons(control_name, driver, occurrences=5)
+
 
 
 if __name__ == "__main__":
