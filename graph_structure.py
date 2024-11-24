@@ -187,16 +187,16 @@ def get_graph_structure_overview():
 
     # get_all_node_counts(node_count_labels, driver)
 
-    # relationships = [
-    #     ("Biological_sample", "HAS_DAMAGE", "Gene"),
-    #     ("Biological_sample", "HAS_PROTEIN", "Protein"),
-    #     ("Biological_sample", "HAS_DISEASE", "Disease"),
-    #     ("Biological_sample", "HAS_PHENOTYPE", "Phenotype"),
-    # ]
+    relationships = [
+        ("Biological_sample", "HAS_DAMAGE", "Gene"),
+        ("Biological_sample", "HAS_PROTEIN", "Protein"),
+        ("Biological_sample", "HAS_DISEASE", "Disease"),
+        ("Biological_sample", "HAS_PHENOTYPE", "Phenotype"),
+    ]
 
     # relationships = get_all_relationships(driver)
 
-    # get_all_rel_min_max_avg(relationships, driver)
+    get_all_rel_min_max_avg(relationships, driver)
 
     get_people_analysis(driver)
     get_missing_ensamble_id_analysis(driver)
