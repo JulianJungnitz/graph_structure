@@ -183,15 +183,17 @@ def get_graph_structure_overview():
 
     get_disease_counts(driver, min_occurrence=1)
 
-    # node_count_labels = get_all_node_types(driver)
+    node_count_labels = ["Biological_sample", "Subject", "Project"]
 
-    # get_all_node_counts(node_count_labels, driver)
+    get_all_node_counts(node_count_labels, driver)
 
     relationships = [
         ("Biological_sample", "HAS_DAMAGE", "Gene"),
         ("Biological_sample", "HAS_PROTEIN", "Protein"),
         ("Biological_sample", "HAS_DISEASE", "Disease"),
         ("Biological_sample", "HAS_PHENOTYPE", "Phenotype"),
+        ("Biological_sample", "BELONGS_TO_SUBJECT", "Subject"),
+        ("Project", "HAS_ENROLLED", "Subject"),
     ]
 
     # relationships = get_all_relationships(driver)
