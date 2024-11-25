@@ -1,8 +1,8 @@
 import os
 
 
-NEO4J_URI = "bolt://172.19.0.3:7687"
-NEO4J_USERNAME = "neo4j"
+NEO4J_URL = "bolt://172.19.0.3:7687"
+NEO4J_LOGIN = "neo4j"
 NEO4J_PASSWORD = "Neo4JJJJJ"
 NEO4J_DATABASE = "graphdb2"
 
