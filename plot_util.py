@@ -87,6 +87,8 @@ def plot_common_group_comparison(
         + list(percentage_map_disease.values())
         + list(percentage_map_control.values())
     )
+    if(len(all_percentages) == 0):
+        return
     max_percentage = max(all_percentages)
     min_percentage = min(all_percentages)
 
