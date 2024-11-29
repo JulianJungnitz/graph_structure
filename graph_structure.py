@@ -29,7 +29,7 @@ def get_rel_min_max_avg(
 
     result = request(driver, query)
     log_to_file(
-        f"{start} -> [{rel}] -> {end}, min: {result[0]['min']}, max: {result[0]['max']}, avg: {result[0]['avg']}, stDev: {result[0]["stDev"]}\n"
+        f"{start} -> [{rel}] -> {end}, min: {result[0]['min']}, max: {result[0]['max']}, avg: {result[0]['avg']}, stDev: {result[0]['stDev']}\n"
     )
 
 
