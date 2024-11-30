@@ -30,8 +30,14 @@ def get_rel_min_max_avg(
 
     result = request(driver, query)
     log_to_file(
-        f"{start} -> [{rel}] -> {end}, min: {result[0]['min']}, max: {result[0]['max']}, avg: {result[0]['avg']}, stDev: {result[0]['stDev']}\n"
+        f"{start} -> [{rel}] -> {end}, min: {result[0]['min']}, max: {result[0]['max']}, avg: {result[0]['avg']}, stDev: {result[0]['stDev']}, "
     )
+    query = f"""
+    MATCH (a:{start})-[r:{rel}]->(b:{end})
+    RETURN count(distinct r) as count
+    """
+    result = request(driver, query)
+    log_to_file(f"total count: {result[0]['count']} \n")
 
 
 def attribute_min_max_avg(
@@ -74,12 +80,13 @@ def get_disease_counts(
     driver,
     top_k=None,
     name=None,
-    min_occurrence=1,
+    min_occurrence=1, log = False
 ):
-    log_to_file("\n")
-    log_to_file(
-        "------------------------- Disease analysis -------------------------\n"
-    )
+    if log:
+        log_to_file("\n")
+        log_to_file(
+            "------------------------- Disease analysis -------------------------\n"
+        )
     includeControl = False
     if name == "control":
         includeControl = True
@@ -103,15 +110,17 @@ def get_disease_counts(
     result = request(driver, query)
 
     total_disease_count = len(result)
-    log_to_file(f"Total number of diseases: {total_disease_count} \n")
+    if log:
+        log_to_file(f"Total number of diseases: {total_disease_count} \n")
 
-    log_to_file("Diseases by count\n")
+        log_to_file("Diseases by count\n")
     index = 0
     disease_counts = {}
     for disease in result:
         if disease["disease_count"] < min_occurrence:
             break
-        log_to_file(f"{index}, {disease['disease_count']} \n")
+        if log:
+            log_to_file(f"{index}, {disease['disease_count']} \n")
         index += 1
         disease_counts[disease["name"]] = disease["disease_count"]
     return disease_counts
@@ -184,6 +193,36 @@ def get_missing_ensamble_id_analysis(driver):
         f"Number of relationships between a sample and a gene withou ensamble id: {result[0]['number_of_relationships']}\n"
     )
 
+def get_icd10_disease_map(driver):
+    query = """MATCH (d:Disease)
+        WHERE d.synonyms IS NOT NULL AND size(d.synonyms) > 0
+        UNWIND d.synonyms AS synonym
+        RETURN d.name AS name, synonym"""
+    result = request(driver, query)
+    icd10map = {}
+    for disease in result:
+        if disease["synonym"].startswith("ICD10"):
+            if disease["synonym"] in icd10map:
+                print(f"Duplicate: {disease['synonym']} for {disease['name']}")
+            
+            icd10map[disease["name"]] = disease["synonym"]
+    return icd10map
+
+def collect_by_icd10(disease_counts, icd10map):
+    icd10DiseaseCounts = {}
+
+    for disease in disease_counts:
+        if disease in icd10map:
+            if icd10DiseaseCounts.get(icd10map[disease]):
+                icd10DiseaseCounts[icd10map[disease]] = max(icd10DiseaseCounts[icd10map[disease]], disease_counts[disease])
+            else:
+                icd10DiseaseCounts[icd10map[disease]] = disease_counts[disease]
+        else:
+            icd10DiseaseCounts[disease] = disease_counts[disease]
+    log_to_file("--------------- Diseases by ICD10 code or disease ---------------")
+    for i,disease in enumerate(icd10DiseaseCounts):
+        log_to_file(f"{i}, {icd10DiseaseCounts[disease]}s\n") 
+    return icd10DiseaseCounts
 
 def get_graph_structure_overview():
     driver = GraphDatabase.driver(
@@ -192,7 +231,10 @@ def get_graph_structure_overview():
     clear_log_file()
     log_to_file("Graph structure overview\n")
 
-    # get_disease_counts(driver, min_occurrence=1)
+    icd10map = get_icd10_disease_map(driver)
+    
+    disease_counts = get_disease_counts(driver, min_occurrence=1)
+    collect_by_icd10(disease_counts, icd10map)
 
     # node_count_labels = get_all_node_types(driver)
 
@@ -204,14 +246,15 @@ def get_graph_structure_overview():
         ("Biological_sample", "HAS_PHENOTYPE", "Phenotype"),
         ("Biological_sample", "HAS_PROTEIN", "Protein"),
         ("Biological_sample", "HAS_DAMAGE", "Gene"),
-        ("Known_variant", "VARIANT_FOUND_IN_CHROMOSOME", "Chromosome"),
-        ("Known_variant", "VARIANT_FOUND_IN_GENE", "Gene"),
-        ("Known_variant", "VARIANT_FOUND_IN_PROTEIN", "Protein"),
-    ]
+     ]
 
-     # relationships = get_all_relationships(driver)
+    # relationships = get_all_relationships(driver)
+    # print(relationships)
     
-    get_all_rel_min_max_avg(relationships, driver)
+    # relationships = [('Tissue', 'HAS_PARENT', 'Tissue'), ('Biological_process', 'HAS_PARENT', 'Biological_process'), ('Disease', 'HAS_PARENT', 'Disease'), ('Molecular_function', 'HAS_PARENT', 'Molecular_function'), ('Cellular_component', 'HAS_PARENT', 'Cellular_component'), ('Modification', 'HAS_PARENT', 'Modification'), ('Phenotype', 'HAS_PARENT', 'Phenotype'), ('Gene', 'ASSOCIATED_WITH', 'Disease'), ('Experimental_factor', 'HAS_PARENT', 'Experimental_factor'), ('Experimental_factor', 'MAPS_TO', 'Disease'), ('Transcript', 'LOCATED_IN', 'Chromosome'), ('Experimental_factor', 'MAPS_TO', 'Phenotype'), ('Gene', 'TRANSCRIBED_INTO', 'Transcript'), ('Peptide', 'BELONGS_TO_PROTEIN', 'Protein'), ('Gene', 'TRANSLATED_INTO', 'Protein'), ('Transcript', 'TRANSLATED_INTO', 'Protein'), ('Protein', 'ASSOCIATED_WITH', 'Cellular_component'), ('Protein', 'ASSOCIATED_WITH', 'Molecular_function'), ('Protein', 'ASSOCIATED_WITH', 'Biological_process'), ('Modified_protein', 'HAS_MODIFICATION', 'Modification'), ('Protein', 'HAS_MODIFIED_SITE', 'Modified_protein'), ('Peptide', 'HAS_MODIFIED_SITE', 'Modified_protein'), ('Modified_protein', 'IS_SUBSTRATE_OF', 'Protein'), ('Protein', 'IS_SUBUNIT_OF', 'Complex'), ('Complex', 'ASSOCIATED_WITH', 'Biological_process'), ('Protein', 'CURATED_INTERACTS_WITH', 'Protein'), ('Protein', 'COMPILED_INTERACTS_WITH', 'Protein'), ('Protein', 'ACTS_ON', 'Protein'), ('Protein', 'ASSOCIATED_WITH', 'Disease'), ('Protein', 'IS_BIOMARKER_OF_DISEASE', 'Disease'), ('Protein', 'IS_QCMARKER_IN_TISSUE', 'Tissue'), ('Clinical_variable', 'HAS_PARENT', 'Clinical_variable'), ('Experimental_factor', 'MAPS_TO', 'Clinical_variable'), ('Gene', 'LOCATED_IN', 'Chromosome'), ('Known_variant', 'VARIANT_FOUND_IN_CHROMOSOME', 'Chromosome'), ('Known_variant', 'VARIANT_FOUND_IN_GENE', 'Gene'), ('Known_variant', 'VARIANT_FOUND_IN_PROTEIN', 'Protein'), ('Known_variant', 'CURATED_AFFECTS_INTERACTION_WITH', 'Protein'), ('Clinically_relevant_variant', 'ASSOCIATED_WITH', 'Disease'), ('Protein', 'DETECTED_IN_PATHOLOGY_SAMPLE', 'Disease'), ('Known_variant', 'VARIANT_IS_CLINICALLY_RELEVANT', 'Clinically_relevant_variant'), ('Disease', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Tissue', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Protein', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Disease', 'MAPS_TO', 'Clinical_variable'), ('Cellular_component', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Modified_protein', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Protein', 'ASSOCIATED_WITH', 'Tissue'), ('Functional_region', 'FOUND_IN_PROTEIN', 'Protein'), ('Functional_region', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Metabolite', 'ASSOCIATED_WITH', 'Protein'), ('Metabolite', 'ASSOCIATED_WITH', 'Disease'), ('Known_variant', 'VARIANT_FOUND_IN_GWAS', 'GWAS_study'), ('GWAS_study', 'STUDIES_TRAIT', 'Experimental_factor'), ('Protein', 'ANNOTATED_IN_PATHWAY', 'Pathway'), ('Metabolite', 'ANNOTATED_IN_PATHWAY', 'Pathway'), ('GWAS_study', 'PUBLISHED_IN', 'Publication'), ('Project', 'HAS_ENROLLED', 'Subject'), ('Biological_sample', 'BELONGS_TO_SUBJECT', 'Subject'), ('Biological_sample', 'HAS_DISEASE', 'Disease'), ('Biological_sample', 'HAS_PHENOTYPE', 'Phenotype'), ('Biological_sample', 'HAS_PROTEIN', 'Protein'), ('Biological_sample', 'HAS_DAMAGE', 'Gene')]
+    # relationships = relationships[34:]
+
+    # get_all_rel_min_max_avg(relationships, driver)
 
     # get_people_analysis(driver)
     # get_missing_ensamble_id_analysis(driver)
