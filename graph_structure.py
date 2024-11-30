@@ -199,14 +199,14 @@ def get_graph_structure_overview():
     # get_all_node_counts(node_count_labels, driver)
 
     relationships = [
-        ("Known_variant", "VARIANT_FOUND_IN_CHROMOSOME", "Chromosome"),
-        ("Known_variant", "VARIANT_FOUND_IN_GENE", "Gene"),
-        ("Known_variant", "VARIANT_FOUND_IN_PROTEIN", "Protein"),
         ("Biological_sample", "BELONGS_TO_SUBJECT", "Subject"),
         ("Biological_sample", "HAS_DISEASE", "Disease"),
         ("Biological_sample", "HAS_PHENOTYPE", "Phenotype"),
         ("Biological_sample", "HAS_PROTEIN", "Protein"),
         ("Biological_sample", "HAS_DAMAGE", "Gene"),
+        ("Known_variant", "VARIANT_FOUND_IN_CHROMOSOME", "Chromosome"),
+        ("Known_variant", "VARIANT_FOUND_IN_GENE", "Gene"),
+        ("Known_variant", "VARIANT_FOUND_IN_PROTEIN", "Protein"),
     ]
 
      # relationships = get_all_relationships(driver)
