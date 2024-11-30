@@ -21,7 +21,8 @@ def get_rel_min_max_avg(
 ):
 
     query = f"""
-    MATCH (a:{start})-[r:{rel}]->(b:{end}) 
+    MATCH (a:{start})
+    Optional MATCH (a:{start})-[r:{rel}]->(b:{end}) 
     With count(distinct r) as rel_count, a as a
     RETURN min(rel_count) as min, max(rel_count) as max, avg(rel_count) as avg, stDev(rel_count) as stDev
     """
@@ -29,7 +30,7 @@ def get_rel_min_max_avg(
 
     result = request(driver, query)
     log_to_file(
-        f"{start} -> [{rel}] -> {end}, min: {result[0]['min']}, max: {result[0]['max']}, avg: {result[0]['avg']}, stDev: {result[0]["stDev"]}\n"
+        f"{start} -> [{rel}] -> {end}, min: {result[0]['min']}, max: {result[0]['max']}, avg: {result[0]['avg']}, stDev: {result[0]['stDev']}\n"
     )
 
 
@@ -69,7 +70,12 @@ def get_all_rel_min_max_avg(relationships, driver):
         get_rel_min_max_avg(rel[0], rel[1], rel[2], driver)
 
 
-def get_disease_counts(driver, top_k=None, name=None, min_occurrence=1,):
+def get_disease_counts(
+    driver,
+    top_k=None,
+    name=None,
+    min_occurrence=1,
+):
     log_to_file("\n")
     log_to_file(
         "------------------------- Disease analysis -------------------------\n"
@@ -79,12 +85,16 @@ def get_disease_counts(driver, top_k=None, name=None, min_occurrence=1,):
         includeControl = True
 
     query = (
-        """Match (s:Biological_sample) -[r:HAS_DISEASE]-> (b:Disease """ + ( "{name: \"" + name+"\"}" if  name else "") + """)
+        """Match (s:Biological_sample) -[r:HAS_DISEASE]-> (b:Disease """
+        + ('{name: "' + name + '"}' if name else "")
+        + """)
             with count(r) as disease_count, b.name as name
-            where disease_count>= """ + str(min_occurrence) + """
-            """+
-           ( "" if includeControl else "and b.name <> 'control'") +
+            where disease_count>= """
+        + str(min_occurrence)
+        + """
             """
+        + ("" if includeControl else "and b.name <> 'control'")
+        + """
             return name, disease_count order by disease_count desc """
         + (f" limit {top_k}" if top_k else "")
         + ""
@@ -105,8 +115,6 @@ def get_disease_counts(driver, top_k=None, name=None, min_occurrence=1,):
         index += 1
         disease_counts[disease["name"]] = disease["disease_count"]
     return disease_counts
-        
-    
 
 
 def get_people_analysis(driver):
@@ -135,14 +143,13 @@ def get_people_analysis(driver):
 
 
 def get_all_relationships(driver):
-    query = "MATCH (a)-[r]->(b) RETURN distinct type(r) as relationship"
+    query = "MATCH (a)-[r]->(b) RETURN distinct type(r) as relationship, labels(a)[0] as a,  labels(b)[0] as b"
     result = request(driver, query)
     print(result)
     relationships = []
     for rel in result:
-        relationships.append(rel["relationship"])
+        relationships.append((rel["a"], rel["relationship"], rel["b"]))
     return relationships
-
 
 
 def get_all_node_types(driver):
@@ -167,11 +174,15 @@ def get_missing_ensamble_id_analysis(driver):
     log_to_file(
         f"------------------------- Missing Ensamble ID analysis -------------------------\n"
     )
-    log_to_file(f"Number of genes without ensamble id: {result[0]['number_of_genes']}\n")
+    log_to_file(
+        f"Number of genes without ensamble id: {result[0]['number_of_genes']}\n"
+    )
     log_to_file(
         f"Number of biological samples connected to genes without ensamble id: {result[0]['number_of_biological_samples']}\n"
     )
-    log_to_file(f"Number of relationships between a sample and a gene withou ensamble id: {result[0]['number_of_relationships']}\n")
+    log_to_file(
+        f"Number of relationships between a sample and a gene withou ensamble id: {result[0]['number_of_relationships']}\n"
+    )
 
 
 def get_graph_structure_overview():
@@ -181,27 +192,29 @@ def get_graph_structure_overview():
     clear_log_file()
     log_to_file("Graph structure overview\n")
 
-    get_disease_counts(driver, min_occurrence=1)
+    # get_disease_counts(driver, min_occurrence=1)
 
     node_count_labels = ["Biological_sample", "Subject", "Project"]
 
     get_all_node_counts(node_count_labels, driver)
 
     relationships = [
-        ("Biological_sample", "HAS_DAMAGE", "Gene"),
-        ("Biological_sample", "HAS_PROTEIN", "Protein"),
+        ("Biological_sample", "BELONGS_TO_SUBJECT", "Subject"),
         ("Biological_sample", "HAS_DISEASE", "Disease"),
         ("Biological_sample", "HAS_PHENOTYPE", "Phenotype"),
-        ("Biological_sample", "BELONGS_TO_SUBJECT", "Subject"),
-        ("Project", "HAS_ENROLLED", "Subject"),
+        ("Biological_sample", "HAS_PROTEIN", "Protein"),
+        ("Biological_sample", "HAS_DAMAGE", "Gene"),
+        ("Known_variant", "VARIANT_FOUND_IN_CHROMOSOME", "Chromosome"),
+        ("Known_variant", "VARIANT_FOUND_IN_GENE", "Gene"),
+        ("Known_variant", "VARIANT_FOUND_IN_PROTEIN", "Protein"),
     ]
 
-    # relationships = get_all_relationships(driver)
-
+     # relationships = get_all_relationships(driver)
+    
     get_all_rel_min_max_avg(relationships, driver)
 
-    get_people_analysis(driver)
-    get_missing_ensamble_id_analysis(driver)
+    # get_people_analysis(driver)
+    # get_missing_ensamble_id_analysis(driver)
 
 
 if __name__ == "__main__":
