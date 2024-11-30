@@ -221,7 +221,7 @@ def collect_by_icd10(disease_counts, icd10map):
             icd10DiseaseCounts[disease] = disease_counts[disease]
     log_to_file("--------------- Diseases by ICD10 code or disease ---------------")
     for i,disease in enumerate(icd10DiseaseCounts):
-        log_to_file(f"{i}, {icd10DiseaseCounts[disease]}s\n") 
+        log_to_file(f"{i}, {icd10DiseaseCounts[disease]}\n") 
     return icd10DiseaseCounts
 
 def get_graph_structure_overview():
@@ -254,10 +254,10 @@ def get_graph_structure_overview():
     # relationships = [('Tissue', 'HAS_PARENT', 'Tissue'), ('Biological_process', 'HAS_PARENT', 'Biological_process'), ('Disease', 'HAS_PARENT', 'Disease'), ('Molecular_function', 'HAS_PARENT', 'Molecular_function'), ('Cellular_component', 'HAS_PARENT', 'Cellular_component'), ('Modification', 'HAS_PARENT', 'Modification'), ('Phenotype', 'HAS_PARENT', 'Phenotype'), ('Gene', 'ASSOCIATED_WITH', 'Disease'), ('Experimental_factor', 'HAS_PARENT', 'Experimental_factor'), ('Experimental_factor', 'MAPS_TO', 'Disease'), ('Transcript', 'LOCATED_IN', 'Chromosome'), ('Experimental_factor', 'MAPS_TO', 'Phenotype'), ('Gene', 'TRANSCRIBED_INTO', 'Transcript'), ('Peptide', 'BELONGS_TO_PROTEIN', 'Protein'), ('Gene', 'TRANSLATED_INTO', 'Protein'), ('Transcript', 'TRANSLATED_INTO', 'Protein'), ('Protein', 'ASSOCIATED_WITH', 'Cellular_component'), ('Protein', 'ASSOCIATED_WITH', 'Molecular_function'), ('Protein', 'ASSOCIATED_WITH', 'Biological_process'), ('Modified_protein', 'HAS_MODIFICATION', 'Modification'), ('Protein', 'HAS_MODIFIED_SITE', 'Modified_protein'), ('Peptide', 'HAS_MODIFIED_SITE', 'Modified_protein'), ('Modified_protein', 'IS_SUBSTRATE_OF', 'Protein'), ('Protein', 'IS_SUBUNIT_OF', 'Complex'), ('Complex', 'ASSOCIATED_WITH', 'Biological_process'), ('Protein', 'CURATED_INTERACTS_WITH', 'Protein'), ('Protein', 'COMPILED_INTERACTS_WITH', 'Protein'), ('Protein', 'ACTS_ON', 'Protein'), ('Protein', 'ASSOCIATED_WITH', 'Disease'), ('Protein', 'IS_BIOMARKER_OF_DISEASE', 'Disease'), ('Protein', 'IS_QCMARKER_IN_TISSUE', 'Tissue'), ('Clinical_variable', 'HAS_PARENT', 'Clinical_variable'), ('Experimental_factor', 'MAPS_TO', 'Clinical_variable'), ('Gene', 'LOCATED_IN', 'Chromosome'), ('Known_variant', 'VARIANT_FOUND_IN_CHROMOSOME', 'Chromosome'), ('Known_variant', 'VARIANT_FOUND_IN_GENE', 'Gene'), ('Known_variant', 'VARIANT_FOUND_IN_PROTEIN', 'Protein'), ('Known_variant', 'CURATED_AFFECTS_INTERACTION_WITH', 'Protein'), ('Clinically_relevant_variant', 'ASSOCIATED_WITH', 'Disease'), ('Protein', 'DETECTED_IN_PATHOLOGY_SAMPLE', 'Disease'), ('Known_variant', 'VARIANT_IS_CLINICALLY_RELEVANT', 'Clinically_relevant_variant'), ('Disease', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Tissue', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Protein', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Disease', 'MAPS_TO', 'Clinical_variable'), ('Cellular_component', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Modified_protein', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Protein', 'ASSOCIATED_WITH', 'Tissue'), ('Functional_region', 'FOUND_IN_PROTEIN', 'Protein'), ('Functional_region', 'MENTIONED_IN_PUBLICATION', 'Publication'), ('Metabolite', 'ASSOCIATED_WITH', 'Protein'), ('Metabolite', 'ASSOCIATED_WITH', 'Disease'), ('Known_variant', 'VARIANT_FOUND_IN_GWAS', 'GWAS_study'), ('GWAS_study', 'STUDIES_TRAIT', 'Experimental_factor'), ('Protein', 'ANNOTATED_IN_PATHWAY', 'Pathway'), ('Metabolite', 'ANNOTATED_IN_PATHWAY', 'Pathway'), ('GWAS_study', 'PUBLISHED_IN', 'Publication'), ('Project', 'HAS_ENROLLED', 'Subject'), ('Biological_sample', 'BELONGS_TO_SUBJECT', 'Subject'), ('Biological_sample', 'HAS_DISEASE', 'Disease'), ('Biological_sample', 'HAS_PHENOTYPE', 'Phenotype'), ('Biological_sample', 'HAS_PROTEIN', 'Protein'), ('Biological_sample', 'HAS_DAMAGE', 'Gene')]
     # relationships = relationships[34:]
 
-    # get_all_rel_min_max_avg(relationships, driver)
+    get_all_rel_min_max_avg(relationships, driver)
 
     # get_people_analysis(driver)
-    # get_missing_ensamble_id_analysis(driver)
+    get_missing_ensamble_id_analysis(driver)
 
 
 if __name__ == "__main__":
