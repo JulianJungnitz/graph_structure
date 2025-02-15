@@ -241,7 +241,7 @@ def get_graph_structure_overview():
     # disease_counts = get_disease_counts(driver, min_occurrence=1)
     # collect_by_icd10(disease_counts, icd10map)
 
-    # use_wccComponent = False
+    use_wccComponent = False
 
     # node_count_labels = get_all_node_types(driver, use_wccComponent)
     # print(node_count_labels)
